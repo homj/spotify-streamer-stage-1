@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Spotify Streamer</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_artist">ArtistActivity</string>
+    <string name="top_tracks">Top Tracks</string>
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="title_activity_player">PlayerActivity</string>
+
+    <string name="error_no_internet">You\'re not connected to the internet</string>
+    <string name="error_no_artists_found">I couldn\'t find any artists. How about refining the search?</string>
+    <string name="error_no_tracks_found">I couldn\'t find any tracks</string>
+    <string name="hint_search">Search for artists</string>
+</resources>

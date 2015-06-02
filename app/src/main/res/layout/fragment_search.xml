@@ -1,0 +1,34 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:baselineAligned="false"
+    android:orientation="vertical"
+    tools:context=".MainActivityFragment">
+
+    <SearchView
+        android:id="@+id/searchview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/default_spacing"
+        android:layout_marginTop="@dimen/default_spacing"
+        android:iconifiedByDefault="false"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:queryHint="Search"/>
+
+    <de.twoid.spotifystreamer.widget.EmptyLayout
+        android:id="@+id/empty_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:empty_state="display_message"
+        app:error_message="@string/hint_search">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/results_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </de.twoid.spotifystreamer.widget.EmptyLayout>
+</LinearLayout>

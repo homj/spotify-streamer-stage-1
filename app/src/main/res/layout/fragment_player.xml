@@ -1,0 +1,74 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="de.twoid.spotifystreamer.player.PlayerFragment">
+
+    <ImageView
+        android:id="@+id/iv_picture"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        android:background="#55000000"
+        android:src="@drawable/ic_albumart_placeholder"/>
+
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="top"
+        android:background="@drawable/gradient_top_bottom"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:padding="@dimen/default_spacing"
+        android:orientation="vertical"
+        android:background="@drawable/gradient_bottom_top">
+
+        <TextView
+            android:id="@+id/tv_track_name"
+            android:layout_width="@dimen/player_controls_width"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_spacing"
+            android:layout_gravity="center_horizontal"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title.Inverse"
+            android:text="track"/>
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="@dimen/player_seekbar_width"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-17dp"
+            android:layout_gravity="center_horizontal"
+            android:progress="1"
+            android:max="10"
+            android:progressBackgroundTint="@color/accent"
+            android:elevation="9dp"
+            android:progressDrawable="@drawable/seekbar_progress"/>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/controls_layout"
+            android:layout_width="@dimen/player_controls_width"
+            android:layout_height="@dimen/player_controls_height"
+            android:layout_gravity="center_horizontal"
+            app:cardBackgroundColor="@color/branding"
+            app:cardCornerRadius="2dp"
+            app:cardElevation="8dp"
+            app:cardMaxElevation="8dp"
+            app:cardPreventCornerOverlap="false">
+
+            <include
+                layout="@layout/layout_player_controls"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </android.support.v7.widget.CardView>
+    </LinearLayout>
+
+</FrameLayout>

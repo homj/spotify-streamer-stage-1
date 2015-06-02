@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="EmptyLayout">
+        <attr name="empty_state"/>
+        <attr name="error_message" format="reference"/>
+        <attr name="error_image" format="reference"/>/>
+    </declare-styleable>
+
+    <attr name="empty_state">
+        <enum name="display_content" value="0"/>
+        <enum name="display_loading" value="1"/>
+        <enum name="display_message" value="2"/>
+    </attr>
+</resources>
