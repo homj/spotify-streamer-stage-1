@@ -15,4 +15,10 @@
         <item name="colorPrimaryDark">@color/branding_dark</item>
         <item name="colorAccent">@color/accent</item>
     </style>
+
+    <style name="AppTheme.Toolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    </style>
+
+    <style name="AppTheme.Toolbar.Dark" parent="ThemeOverlay.AppCompat.ActionBar">
+    </style>
 </resources>

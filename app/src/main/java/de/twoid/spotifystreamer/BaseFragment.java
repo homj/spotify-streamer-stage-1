@@ -15,25 +15,30 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        onRestoreInstanceState(savedInstanceState);
+        initResources();
+        setupResources();
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
-        onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState != null){
+            onRestoreInstanceState(savedInstanceState);
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View root = inflater.inflate(getLayoutId(), container, false);
-        initResources();
-        setupResources();
         initViews(root);
-        setupViews();
-        onRestoreInstanceState(savedInstanceState);
         return root;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState){
+        super.onViewCreated(view, savedInstanceState);
+        setupViews();
     }
 
     protected abstract int getLayoutId();

@@ -1,0 +1,78 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:showDividers="none"
+    tools:context="de.twoid.spotifystreamer.MainActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        style="@style/AppTheme.Toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="128dp"
+        android:background="?attr/colorPrimary"
+        android:layout_gravity="top"
+        android:gravity="top"
+        android:minHeight="?attr/actionBarSize"
+        app:contentInsetStart="@dimen/default_spacing"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_gravity="top|left|start"
+            android:gravity="center_vertical"
+            android:text="@string/app_name"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+        </android.support.v7.widget.Toolbar>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="-64dp"
+        android:baselineAligned="false"
+        android:elevation="5dp"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/default_spacing"
+        android:showDividers="none">
+
+        <!--
+        This layout is a two-pane layout for the SpotifyArtists
+        master/detail flow.
+
+        -->
+
+        <fragment
+            android:id="@+id/search_fragment"
+            android:name="de.twoid.spotifystreamer.search.SearchFragment"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            tools:layout="@layout/fragment_search"/>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/spotifyartist_detail_container"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="64dp"
+            android:layout_weight="1.25"
+            app:cardCornerRadius="2dp"
+            app:cardElevation="8dp"/>
+
+    </LinearLayout>
+
+
+
+    <fragment
+        android:id="@+id/player_bar_fragment"
+        android:name="de.twoid.spotifystreamer.player.PlayerBarFragment"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_marginBottom="-64dp"
+        tools:layout="@layout/fragment_player_bar"/>
+</LinearLayout>
+

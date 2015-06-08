@@ -19,14 +19,10 @@ public class Error implements Parcelable {
     private static final int BY_OBJECT = 1;
 
     @IntDef({NOT_SET, BY_RES_ID, BY_OBJECT})
-    private @interface TextState {
-
-    }
+    private @interface TextState{}
 
     @IntDef({NOT_SET, BY_RES_ID})
-    private @interface ImageState {
-
-    }
+    private @interface ImageState{}
 
     @StringRes
     private int errorTextResId;

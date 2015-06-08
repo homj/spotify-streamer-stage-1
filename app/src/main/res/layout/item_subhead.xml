@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    android:id="@+id/tv_subhead"
+    style="@style/TextAppearance.AppCompat.Subhead"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:gravity="center_vertical"
+    android:paddingEnd="@dimen/default_spacing"
+    android:paddingLeft="@dimen/default_spacing"
+    android:paddingRight="@dimen/default_spacing"
+    app:paddingStart="@dimen/default_spacing">
+</TextView>

@@ -16,7 +16,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_spacing"
+        android:layout_marginTop="@dimen/grid_size"
+        android:layout_marginBottom="@dimen/grid_size"
+        android:layout_marginLeft="@dimen/default_spacing"
+        android:layout_marginRight="@dimen/default_spacing"
         android:layout_gravity="top"
         android:orientation="vertical">
 

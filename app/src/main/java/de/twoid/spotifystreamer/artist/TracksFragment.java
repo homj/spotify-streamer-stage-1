@@ -58,7 +58,7 @@ public class TracksFragment extends SpotifyFragment {
 
     @Override
     protected void setupResources(){
-        trackAdapter = new TrackAdapter();
+        trackAdapter = new TrackAdapter(R.string.top_tracks);
         artist = getArguments().getParcelable(ARG_SPOTIFY_ARTIST);
 
 

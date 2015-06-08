@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.twoid.spotifystreamer.util.MathUtils;
 import kaaes.spotify.webapi.android.models.Track;
 
 /**
@@ -87,6 +88,47 @@ public class SpotifyTrack implements Parcelable {
         return new SpotifyTrack(track);
     }
 
+    public boolean hasImage(){
+        return album != null && album.images != null && !album.images.isEmpty();
+    }
+
+    public SpotifyImage getLargestImage(){
+        if(!hasImage()){
+            return null;
+        }
+
+        return album.images.get(0);
+    }
+
+    public SpotifyImage getMediumImage(){
+        if(!hasImage()){
+            return null;
+        }
+
+        final int imageCount = album.images.size();
+        if(imageCount == 0){
+            return album.images.get(0);
+        }
+
+        return album.images.get(MathUtils.clamp(imageCount / 2, 1, imageCount) - 1);
+    }
+
+    public SpotifyImage getSmallestImage(){
+        if(!hasImage()){
+            return null;
+        }
+
+        return album.images.get(album.images.size() - 1);
+    }
+
+    public boolean hasArtists(){
+        return artists != null && !artists.isEmpty();
+    }
+
+    public SpotifyArtistSimple getFirstArtist(){
+        return artists.get(0);
+    }
+
     public static final Creator<SpotifyTrack> CREATOR = new Creator<SpotifyTrack>() {
         @Override
         public SpotifyTrack createFromParcel(Parcel in){
@@ -98,6 +140,14 @@ public class SpotifyTrack implements Parcelable {
             return new SpotifyTrack[size];
         }
     };
+
+    public int getPreviewDurationInMillis(){
+        return 30000;
+    }
+
+    public long getDurationInMillis(){
+        return duration_ms;
+    }
 
     @Override
     public int describeContents(){

@@ -44,6 +44,26 @@ public class SpotifyArtist extends SpotifyArtistSimple implements Parcelable {
         return new SpotifyArtist(artist);
     }
 
+    public boolean hasImage(){
+        return images != null && !images.isEmpty();
+    }
+
+    public SpotifyImage getLargestImage(){
+        if(!hasImage()){
+            return null;
+        }
+
+        return images.get(0);
+    }
+
+    public SpotifyImage getSmallestImage(){
+        if(!hasImage()){
+            return null;
+        }
+
+        return images.get(images.size()-1);
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags){
         super.writeToParcel(dest, flags);

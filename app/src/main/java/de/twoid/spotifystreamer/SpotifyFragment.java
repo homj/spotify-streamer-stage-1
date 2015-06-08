@@ -12,6 +12,8 @@ import retrofit.client.Response;
 
 /**
  * Created by Johannes on 01.06.2015.
+ *
+ * Offers easy access to the {@link SpotifyApi}
  */
 public abstract class SpotifyFragment extends BaseFragment implements Handler.Callback {
 

@@ -16,6 +16,7 @@ import de.twoid.spotifystreamer.ItemListAdapter.ItemViewHolder;
 import de.twoid.spotifystreamer.R;
 import de.twoid.spotifystreamer.object.SpotifyArtist;
 import de.twoid.spotifystreamer.object.SpotifyImage;
+import de.twoid.spotifystreamer.search.OnChildClickListener;
 
 /**
  * Created by Johannes on 31.05.2015.
@@ -33,7 +34,7 @@ public class ArtistViewHolder extends ItemViewHolder<SpotifyArtist> {
     }
 
     @Override
-    public void bind(final SpotifyArtist artist){
+    public void bind(final SpotifyArtist artist, boolean isSelected, final OnChildClickListener<SpotifyArtist> clickListener){
         if(artist != null){
             tvName.setText(artist.name);
 
@@ -47,9 +48,10 @@ public class ArtistViewHolder extends ItemViewHolder<SpotifyArtist> {
             itemView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v){
-                    Intent intent = new Intent(v.getContext(), ArtistActivity.class);
-                    intent.putExtra(ArtistActivity.EXTRA_SPOTIFY_ARTIST, artist);
-                    v.getContext().startActivity(intent);
+                    clickListener.onChildClick(v, artist);
+//                    Intent intent = new Intent(v.getContext(), ArtistActivity.class);
+//                    intent.putExtra(ArtistActivity.EXTRA_SPOTIFY_ARTIST, artist);
+//                    v.getContext().startActivity(intent);
                 }
             });
         }else{

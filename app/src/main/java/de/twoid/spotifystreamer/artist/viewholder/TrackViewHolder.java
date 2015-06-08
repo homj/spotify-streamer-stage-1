@@ -16,6 +16,7 @@ import de.twoid.spotifystreamer.player.PlayerActivity;
 import de.twoid.spotifystreamer.R;
 import de.twoid.spotifystreamer.object.SpotifyImage;
 import de.twoid.spotifystreamer.object.SpotifyTrack;
+import de.twoid.spotifystreamer.search.OnChildClickListener;
 
 /**
  * Created by Johannes on 31.05.2015.
@@ -35,7 +36,7 @@ public class TrackViewHolder extends ItemViewHolder<SpotifyTrack> {
     }
 
     @Override
-    public void bind(final SpotifyTrack track){
+    public void bind(final SpotifyTrack track, boolean isSelected, final OnChildClickListener<SpotifyTrack> clickListener){
         if(track != null){
             tvName.setText(track.name);
 
@@ -57,9 +58,7 @@ public class TrackViewHolder extends ItemViewHolder<SpotifyTrack> {
             itemView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v){
-                    Intent intent = new Intent(v.getContext(), PlayerActivity.class);
-                    intent.putExtra(PlayerActivity.EXTRA_SPOTIFY_TRACK, track);
-                    v.getContext().startActivity(intent);
+                    clickListener.onChildClick(v, track);
                 }
             });
         }else{

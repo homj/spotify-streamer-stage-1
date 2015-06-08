@@ -21,6 +21,17 @@ public class SearchAdapter extends ItemListAdapter<SpotifyArtist, ArtistViewHold
 
     public SearchAdapter(List<SpotifyArtist> itemList){
         super(itemList);
+        setHasStableIds(true);
+    }
+
+    public SearchAdapter(List<SpotifyArtist> itemList, int lastSelectedPosition){
+        super(itemList, lastSelectedPosition);
+        setHasStableIds(true);
+    }
+
+    public SearchAdapter(List<SpotifyArtist> itemList, int lastSelectedPosition, OnItemClickListener<SpotifyArtist> onItemClickListener){
+        super(itemList, lastSelectedPosition, onItemClickListener);
+        setHasStableIds(true);
     }
 
     public void setArtists(List<SpotifyArtist> itemList){

@@ -1,7 +1,10 @@
 package de.twoid.spotifystreamer.artist;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -18,10 +21,16 @@ public class ArtistActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist);
 
-        TracksFragment tracksFragment = TracksFragment.getInstance((SpotifyArtist) getIntent().getExtras().getParcelable(EXTRA_SPOTIFY_ARTIST));
-        getSupportFragmentManager()
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment artistFragment = fragmentManager.findFragmentByTag(ArtistFragment.TAG);
+
+        if(artistFragment == null){
+            artistFragment = ArtistFragment.getInstance((SpotifyArtist) getIntent().getExtras().getParcelable(EXTRA_SPOTIFY_ARTIST));
+        }
+
+        fragmentManager
                 .beginTransaction()
-                .replace(R.id.container, tracksFragment)
+                .replace(R.id.container, artistFragment, ArtistFragment.TAG)
                 .commit();
     }
 
@@ -46,5 +55,14 @@ public class ArtistActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void setSupportActionBar(Toolbar toolbar){
+        super.setSupportActionBar(toolbar);
+
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
 }
