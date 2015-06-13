@@ -1,6 +1,6 @@
 # spotify-streamer-stage-1
 
-Used code/instructions:
+## Used code/instructions:
 
 **PlayerService**: http://code.tutsplus.com/tutorials/create-a-music-player-on-android-song-playback--mobile-22778
 
