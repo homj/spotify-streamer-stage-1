@@ -2,42 +2,40 @@ package de.twoid.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
 
 import de.twoid.spotifystreamer.artist.ArtistActivity;
 import de.twoid.spotifystreamer.artist.ArtistFragment;
-import de.twoid.spotifystreamer.artist.TracksFragment;
 import de.twoid.spotifystreamer.object.SpotifyArtist;
+import de.twoid.spotifystreamer.player.PlayerBarFragment;
+import de.twoid.spotifystreamer.player.PlayerBarFragment.OnPlayerBarStateChangeListener;
+import de.twoid.spotifystreamer.player.PlayerService;
 import de.twoid.spotifystreamer.search.SearchFragment;
 import de.twoid.spotifystreamer.search.SearchFragment.OnSpotifyArtistSelectedListener;
+import de.twoid.spotifystreamer.util.ServiceUtils;
 
-public class MainActivity extends AppCompatActivity implements OnSpotifyArtistSelectedListener {
+public class MainActivity extends AppCompatActivity implements OnSpotifyArtistSelectedListener, OnPlayerBarStateChangeListener {
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
     private boolean mTwoPane;
+    private View playerBarContainer;
+    private PlayerBarFragment playerBarFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        playerBarContainer = findViewById(R.id.player_bar_container);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
         if(findViewById(R.id.spotifyartist_detail_container) != null){
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-large and
-            // res/values-sw600dp). If this view is present, then the
-            // activity should be in two-pane mode.
             mTwoPane = true;
 
-            // In two-pane mode, list items should be given the
-            // 'activated' state when touched.
             ((SearchFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.search_fragment))
                     .setActivateOnItemClick(true);
@@ -45,34 +43,63 @@ public class MainActivity extends AppCompatActivity implements OnSpotifyArtistSe
 
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
+        ActionBar actionBar = getSupportActionBar();
+
         if(!mTwoPane){
-            getSupportActionBar().setElevation(0);
+            if(actionBar != null){
+                actionBar.setElevation(0);
+            }
         }else{
-            getSupportActionBar().setTitle(null);
+            if(actionBar != null){
+                actionBar.setTitle(null);
+            }
+
+            ArtistFragment artistFragment = (ArtistFragment) fragmentManager.findFragmentByTag(ArtistFragment.TAG);
+
+            if(artistFragment == null){
+                artistFragment = ArtistFragment.getInstance(null);
+            }
+
+            fragmentManager
+                    .beginTransaction()
+                    .replace(R.id.spotifyartist_detail_container, artistFragment, ArtistFragment.TAG)
+                    .commit();
         }
     }
 
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    protected void onResume(){
+        super.onResume();
+        if(playerBarFragment == null && ServiceUtils.isServiceRunning(this, PlayerService.class)){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            playerBarFragment = (PlayerBarFragment) fragmentManager.findFragmentByTag(PlayerBarFragment.TAG);
+
+            if(playerBarFragment == null){
+                playerBarFragment = new PlayerBarFragment();
+            }
+
+            playerBarFragment.setPlayerBarStateChangeListener(this);
+            fragmentManager.beginTransaction()
+                    .replace(R.id.player_bar_container, playerBarFragment, PlayerBarFragment.TAG)
+                    .commit();
+            onShowPlayerBar();
+        }
+
+        if(playerBarFragment != null && !ServiceUtils.isServiceRunning(this, PlayerService.class)){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction().remove(playerBarFragment);
+            onHidePlayerBar();
+        }
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if(id == R.id.action_settings){
-            return true;
+    protected void onDestroy(){
+        if(playerBarFragment != null){
+            playerBarFragment.setPlayerBarStateChangeListener(null);
+            playerBarFragment = null;
         }
 
-        return super.onOptionsItemSelected(item);
+        super.onDestroy();
     }
 
     @Override
@@ -101,6 +128,20 @@ public class MainActivity extends AppCompatActivity implements OnSpotifyArtistSe
             Intent detailIntent = new Intent(this, ArtistActivity.class);
             detailIntent.putExtra(ArtistActivity.EXTRA_SPOTIFY_ARTIST, artist);
             startActivity(detailIntent);
+        }
+    }
+
+    @Override
+    public void onHidePlayerBar(){
+        if(playerBarContainer != null){
+            playerBarContainer.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onShowPlayerBar(){
+        if(playerBarContainer != null){
+            playerBarContainer.setVisibility(View.VISIBLE);
         }
     }
 }

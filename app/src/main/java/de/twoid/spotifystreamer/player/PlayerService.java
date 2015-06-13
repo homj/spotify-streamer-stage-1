@@ -20,6 +20,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import de.twoid.spotifystreamer.object.PlayerSession;
@@ -49,7 +50,7 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
     private PlayerNotificationManager notificationManager;
     private PlayerSession session;
     private WifiLock wifiLock;
-    private List<Callback> callbacks;
+    private final List<Callback> callbacks = new ArrayList<>();
     private Handler mHandler = new Handler();
     private boolean watchProgressUpdate = false;
     private boolean startPlayingWhenPrepared = false;
@@ -57,10 +58,8 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
     private Runnable progressUpdateRunnable = new Runnable() {
         @Override
         public void run(){
-            if(callbacks != null && mediaPlayer != null){
-                for(Callback callback : callbacks){
-                    callback.onProgressChange(mediaPlayer.getCurrentPosition());
-                }
+            if(mediaPlayer != null){
+                onProgressChange(mediaPlayer.getCurrentPosition());
             }
             if(watchProgressUpdate){
                 mHandler.postDelayed(progressUpdateRunnable, 16);
@@ -82,7 +81,7 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
     }
 
     public int onStartCommand(Intent intent, int flags, int startId){
-        String action = intent.getAction();
+        String action = intent == null ? null : intent.getAction();
         if(ACTION_PLAY.equals(action)){
             ensureMediaPlayerInIdleState();
 
@@ -96,6 +95,7 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
     public void onDestroy(){
         releaseMediaPlayer();
         releaseWifiLock();
+        notificationManager.stopNotification();
         super.onDestroy();
     }
 
@@ -109,11 +109,6 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
     @Override
     public void onCompletion(MediaPlayer mp){
         if(!canPlayNextTrack()){
-            if(callbacks != null){
-                for(Callback callback : callbacks){
-                    callback.onPlaybackStopped();
-                }
-            }
             releaseAndStop();
         }else{
             setNextTrack();
@@ -130,11 +125,7 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
 
     @Override
     public void onStateChanged(@State int newState){
-        if(callbacks != null){
-            for(Callback callback : callbacks){
-                callback.onPlayerStateChanged(newState);
-            }
-        }
+        onPlayerStateChanged(newState);
 
         if(newState == STATE_STARTED || newState == STATE_PAUSED){
             notificationManager.startNotification();
@@ -152,11 +143,9 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
      * @param callback the callback that should be notified on changes
      */
     public void registerCallback(Callback callback){
-        if(callbacks == null){
-            callbacks = new ArrayList<>();
+        synchronized(callbacks){
+            callbacks.add(callback);
         }
-
-        callbacks.add(callback);
     }
 
     /**
@@ -165,11 +154,9 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
      * @param callback the callback to be unregistered
      */
     public void unregisterCallback(Callback callback){
-        if(callbacks == null){
-            return;
+        synchronized(callbacks){
+            callbacks.remove(callback);
         }
-
-        callbacks.remove(callback);
     }
 
     /**
@@ -226,11 +213,6 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
 
     private void setNextTrack(){
         SpotifyTrack track = session.getNextTrack();
-        if(callbacks != null){
-            for(Callback callback : callbacks){
-                callback.onTrackChanged(track);
-            }
-        }
 
         ensureMediaPlayerInIdleState();
         ensureWifiLockHeld();
@@ -239,11 +221,6 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
 
     private void setPreviousTrack(){
         SpotifyTrack track = session.getPreviousTrack();
-        if(callbacks != null){
-            for(Callback callback : callbacks){
-                callback.onTrackChanged(track);
-            }
-        }
 
         ensureMediaPlayerInIdleState();
         ensureWifiLockHeld();
@@ -305,17 +282,15 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
      * Stop playing  the current song.
      * If no song has been prepared, this method will throw an {@link IllegalStateException}!
      */
-    private void stop(){
+    public void stop(){
         if(mediaPlayer.getCurrentState() == STATE_STOPPED){
             return;
         }else if(mediaPlayer.getCurrentState() == STATE_PREPARING){
             startPlayingWhenPrepared = false;
             return;
         }
-        startPlayingWhenPrepared = false;
-        mediaPlayer.stop();
-        setWatchProgress(false);
-        releaseWifiLock();
+
+        releaseAndStop();
     }
 
 
@@ -388,7 +363,10 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
      * Release dependencies and stop this service
      */
     private void releaseAndStop(){
-        releaseMediaPlayer();
+        startPlayingWhenPrepared = false;
+        mediaPlayer.stop();
+        onPlaybackStopped();
+        setWatchProgress(false);
         releaseWifiLock();
         stopForeground(true);
         stopSelf();
@@ -399,6 +377,10 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
      */
     private void releaseMediaPlayer(){
         if(mediaPlayer != null){
+            mediaPlayer.setOnPreparedListener(null);
+            mediaPlayer.setOnCompletionListener(null);
+            mediaPlayer.setOnErrorListener(null);
+            mediaPlayer.setOnStateChangeListener(null);
             mediaPlayer.release();
             mediaPlayer = null;
         }
@@ -486,11 +468,13 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
     private void preparePlaying(@NonNull SpotifyTrack track){
         try{
             mediaPlayer.setDataSource(track.preview_url);
+
+            onTrackChanged(track);
+
+            mediaPlayer.prepareAsync();
         }catch(IOException e){
             e.printStackTrace();
         }
-
-        mediaPlayer.prepareAsync();
     }
 
     /**
@@ -513,6 +497,62 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
 
         public PlayerService getService(){
             return PlayerService.this;
+        }
+    }
+
+    private void onProgressChange(int progress){
+        if(callbacks != null && !callbacks.isEmpty()){
+            synchronized(callbacks){
+                Iterator<Callback> iterator = callbacks.iterator();
+
+                Callback callback;
+                while(iterator.hasNext()){
+                    callback = iterator.next();
+                    callback.onProgressChange(progress);
+                }
+            }
+        }
+    }
+
+    private void onTrackChanged(SpotifyTrack track){
+        if(callbacks != null && !callbacks.isEmpty()){
+            synchronized(callbacks){
+                Iterator<Callback> iterator = callbacks.iterator();
+
+                Callback callback;
+                while(iterator.hasNext()){
+                    callback = iterator.next();
+                    callback.onTrackChanged(track);
+                }
+            }
+        }
+    }
+
+    private void onPlaybackStopped(){
+        if(callbacks != null && !callbacks.isEmpty()){
+            synchronized(callbacks){
+                Iterator<Callback> iterator = callbacks.iterator();
+
+                Callback callback;
+                while(iterator.hasNext()){
+                    callback = iterator.next();
+                    callback.onPlaybackStopped();
+                }
+            }
+        }
+    }
+
+    private void onPlayerStateChanged(@State int newState){
+        if(callbacks != null && !callbacks.isEmpty()){
+            synchronized(callbacks){
+                Iterator<Callback> iterator = callbacks.iterator();
+
+                Callback callback;
+                while(iterator.hasNext()){
+                    callback = iterator.next();
+                    callback.onPlayerStateChanged(newState);
+                }
+            }
         }
     }
 

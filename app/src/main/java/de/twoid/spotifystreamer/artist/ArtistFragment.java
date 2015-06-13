@@ -16,7 +16,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Callback;
@@ -26,7 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.twoid.spotifystreamer.Errors;
+import de.twoid.spotifystreamer.Messages;
 import de.twoid.spotifystreamer.R;
 import de.twoid.spotifystreamer.SpotifyFragment;
 import de.twoid.spotifystreamer.object.PlayerSession;
@@ -34,7 +33,6 @@ import de.twoid.spotifystreamer.object.SpotifyArtist;
 import de.twoid.spotifystreamer.object.SpotifyTrack;
 import de.twoid.spotifystreamer.player.PlayerActivity;
 import de.twoid.spotifystreamer.search.OnItemClickListener;
-import de.twoid.spotifystreamer.util.UiUtils;
 import de.twoid.spotifystreamer.widget.EmptyLayout;
 import kaaes.spotify.webapi.android.SpotifyError;
 import kaaes.spotify.webapi.android.models.Tracks;
@@ -90,9 +88,10 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
         trackAdapter.setOnItemClickListener(this);
         artist = getArguments().getParcelable(ARG_SPOTIFY_ARTIST);
 
-
-        if(!isConnectedToInternet()){
-            displayError(Errors.ERROR_NO_INTERNET);
+        if(artist == null){
+            displayError(Messages.MESSAGE_NO_ARTISTS);
+        }else if(!isConnectedToInternet()){
+            displayError(Messages.MESSAGE_NO_INTERNET);
         }else{
             displayLoading();
 
@@ -106,21 +105,21 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
                 }
 
                 @Override
-                public de.twoid.spotifystreamer.Error resolveError(SpotifyError error){
-                    return Errors.ERROR_NO_TRACKS;
+                public de.twoid.spotifystreamer.Message resolveError(SpotifyError error){
+                    return Messages.MESSAGE_NO_TRACKS;
                 }
             });
         }
     }
 
-    public void setArtist(final SpotifyArtist artist){
+    public void setArtist(SpotifyArtist artist){
         if(this.artist == artist){
             return;
         }
 
         this.artist = artist;
         if(!isConnectedToInternet()){
-            displayError(Errors.ERROR_NO_INTERNET);
+            displayError(Messages.MESSAGE_NO_INTERNET);
         }else{
             displayLoading();
 
@@ -134,36 +133,13 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
                 }
 
                 @Override
-                public de.twoid.spotifystreamer.Error resolveError(SpotifyError error){
-                    return Errors.ERROR_NO_TRACKS;
+                public de.twoid.spotifystreamer.Message resolveError(SpotifyError error){
+                    return Messages.MESSAGE_NO_TRACKS;
                 }
             });
         }
 
-        if(getView() != null){
-            collapsingToolbar.setTitle(artist.name);
-
-            ivPicture.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout(){
-                    if(artist != null && artist.hasImage()){
-                        Picasso.with(getActivity())
-                                .load(artist.getLargestImage().url)
-                                .resize(ivPicture.getWidth(), ivPicture.getHeight())
-                                .centerCrop()
-                                .placeholder(R.drawable.ic_artist_placeholder)
-                                .into(ivPicture, ArtistFragment.this);
-                    }else{
-                        Picasso.with(getActivity())
-                                .load(R.drawable.ic_artist_placeholder)
-                                .resize(ivPicture.getWidth(), ivPicture.getHeight())
-                                .centerCrop()
-                                .into(ivPicture);
-                    }
-                    UiUtils.removeOnGlobalLayoutListener(ivPicture, this);
-                }
-            });
-        }
+            setArtistInfoToViews();
     }
 
     @Override
@@ -189,29 +165,32 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
 
         tracksRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         tracksRecyclerView.setAdapter(trackAdapter);
+        setArtistInfoToViews();
+    }
 
-        collapsingToolbar.setTitle(artist.name);
+    private void setArtistInfoToViews(){
+        collapsingToolbar.setTitle(artist == null ? null : artist.name);
 
-        ivPicture.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout(){
-                if(artist != null && artist.hasImage()){
-                    Picasso.with(getActivity())
-                            .load(artist.getLargestImage().url)
-                            .resize(ivPicture.getWidth(), ivPicture.getHeight())
-                            .centerCrop()
-                            .placeholder(R.drawable.ic_artist_placeholder)
-                            .into(ivPicture, ArtistFragment.this);
-                }else{
-                    Picasso.with(getActivity())
-                            .load(R.drawable.ic_artist_placeholder)
-                            .resize(ivPicture.getWidth(), ivPicture.getHeight())
-                            .centerCrop()
-                            .into(ivPicture);
-                }
-                UiUtils.removeOnGlobalLayoutListener(ivPicture, this);
-            }
-        });
+        if(artist == null){
+            toolbar.setTitle(R.string.unknown_artist);
+        }else{
+            toolbar.setTitle(artist.name);
+        }
+
+        if(artist != null && artist.hasImage()){
+            Picasso.with(getActivity())
+                    .load(artist.getLargestImage().url)
+                    .fit()
+                    .centerCrop()
+                    .placeholder(R.drawable.ic_artist_placeholder)
+                    .into(ivPicture, ArtistFragment.this);
+        }else{
+            Picasso.with(getActivity())
+                    .load(R.drawable.ic_artist_placeholder)
+                    .fit()
+                    .centerCrop()
+                    .into(ivPicture);
+        }
     }
 
     @Override
@@ -220,21 +199,8 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
             if(message.obj != null && message.obj instanceof Tracks){
                 trackList = SpotifyTrack.toSpotifyTrackList(((Tracks) message.obj).tracks);
                 trackAdapter.setTracks(trackList);
-                setArtistToToolbar();
                 displayContent();
             }
-        }
-    }
-
-    private void setArtistToToolbar(){
-        if(toolbar == null){
-            return;
-        }
-
-        if(artist == null){
-            toolbar.setTitle(R.string.unknown_artist);
-        }else{
-            toolbar.setTitle(artist.name);
         }
     }
 
@@ -253,7 +219,7 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
         if(savedInstanceState != null){
             artist = savedInstanceState.getParcelable(KEY_SPOTIFY_ARTIST);
             trackList = savedInstanceState.getParcelableArrayList(KEY_SPOTIFY_TRACK_LIST);
-            setArtistToToolbar();
+            setArtistInfoToViews();
             if(trackAdapter != null){
                 trackAdapter.setTracks(trackList);
             }
@@ -292,10 +258,9 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
         if(isAdded() && getActivity() instanceof ArtistActivity && VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP){
 
             float[] hsv = new float[3];
-            int statusbarcolor = toolbarColor;
             Color.colorToHSV(toolbarColor, hsv);
             hsv[2] *= 0.8f; // value component
-            statusbarcolor = Color.HSVToColor(hsv);
+            int statusbarcolor = Color.HSVToColor(hsv);
 
             getActivity().getWindow().setStatusBarColor(statusbarcolor);
         }

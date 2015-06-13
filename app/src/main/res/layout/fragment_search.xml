@@ -33,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:empty_state="display_message"
-        app:error_message="@string/hint_search">
+        app:error_message="@string/msg_search_hint">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/results_recyclerview"

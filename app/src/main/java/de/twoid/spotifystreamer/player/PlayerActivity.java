@@ -77,4 +77,6 @@ public class PlayerActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
+
+
 }

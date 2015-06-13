@@ -54,11 +54,13 @@ public class ArtistViewHolder extends ItemViewHolder<SpotifyArtist> {
 //                    v.getContext().startActivity(intent);
                 }
             });
+            itemView.setSelected(isSelected);
         }else{
             tvName.setText("?");
             applyPlaceHolderImage();
 
             itemView.setOnClickListener(null);
+            itemView.setActivated(false);
         }
     }
 

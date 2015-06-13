@@ -73,12 +73,12 @@ public abstract class ItemListAdapter<I, V extends ItemViewHolder<I>> extends Re
 
         this.choiceMode = choiceMode;
 
-        if(choiceMode == CHOICEMODE_NONE && lastSelectedPosition > 0){
+        if(choiceMode == CHOICEMODE_NONE && lastSelectedPosition >= 0){
             int oldSelectedPosition = lastSelectedPosition;
             lastSelectedPosition = -1;
             notifyItemChanged(oldSelectedPosition);
         }else if(choiceMode == CHOICEMODE_SINGLE){
-            if(lastSelectedPosition > 0){
+            if(lastSelectedPosition >= 0){
                 activateItemAtPosition(lastSelectedPosition);
             }
         }
@@ -137,11 +137,11 @@ public abstract class ItemListAdapter<I, V extends ItemViewHolder<I>> extends Re
         int oldSelectedPosition = lastSelectedPosition;
         lastSelectedPosition = position;
 
-        if(oldSelectedPosition > 0){
+        if(oldSelectedPosition >= 0){
             notifyItemChanged(oldSelectedPosition);
         }
 
-        if(oldSelectedPosition != lastSelectedPosition && lastSelectedPosition > 0){
+        if(oldSelectedPosition != lastSelectedPosition && lastSelectedPosition >= 0){
             notifyItemChanged(lastSelectedPosition);
         }
     }

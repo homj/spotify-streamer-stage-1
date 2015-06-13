@@ -1,10 +1,8 @@
 package de.twoid.spotifystreamer.search;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -13,27 +11,27 @@ import android.widget.SearchView.OnQueryTextListener;
 
 import java.util.ArrayList;
 
-import de.twoid.spotifystreamer.Error;
-import de.twoid.spotifystreamer.Errors;
 import de.twoid.spotifystreamer.ItemListAdapter;
+import de.twoid.spotifystreamer.Message;
+import de.twoid.spotifystreamer.Messages;
 import de.twoid.spotifystreamer.R;
 import de.twoid.spotifystreamer.SpotifyFragment;
 import de.twoid.spotifystreamer.object.SpotifyArtist;
 import de.twoid.spotifystreamer.widget.EmptyLayout;
 import kaaes.spotify.webapi.android.SpotifyError;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class SearchFragment extends SpotifyFragment implements Handler.Callback, OnItemClickListener<SpotifyArtist>{
+public class SearchFragment extends SpotifyFragment implements Handler.Callback, OnItemClickListener<SpotifyArtist> {
 
     private static final int MESSAGE_TYPE_ARTISTS = 0;
+    private static final int MESSAGE_TYPE_SEARCH = 100;
+    private static final String STATE_QUERY = "query";
     private static final String STATE_SPOTIFY_ARTIST_LIST = "artist_list";
     private static final String STATE_LAST_SELECTED_POSITION = "last_selected_position";
+    private static final long SEARCH_DELAY = 300;
 
     private ArrayList<SpotifyArtist> artistList;
     private SearchAdapter searchAdapter;
@@ -43,6 +41,7 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
     private OnSpotifyArtistSelectedListener itemClickListener;
     private int lastSelectedItemPosition = -1;
     private boolean activateOnItemClick;
+    private String lastQuery;
 
     public SearchFragment(){
 
@@ -92,9 +91,22 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
         resultsRecyclerView.setAdapter(searchAdapter);
     }
 
+    private void searchDelayed(String query){
+        android.os.Message message = android.os.Message.obtain();
+        message.what = MESSAGE_TYPE_SEARCH;
+        message.obj = query;
+        mHandler.removeMessages(MESSAGE_TYPE_SEARCH);
+        mHandler.sendMessageDelayed(message, SEARCH_DELAY);
+    }
+
     private void search(String query){
+        if(query == null || query.equals(lastQuery)){
+            return;
+        }
+
+        lastQuery = query;
         if(!isConnectedToInternet()){
-            displayError(Errors.ERROR_NO_INTERNET);
+            displayError(Messages.MESSAGE_NO_INTERNET);
             return;
         }
 
@@ -106,27 +118,29 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
             }
 
             @Override
-            public de.twoid.spotifystreamer.Error resolveError(SpotifyError error){
-                return new Error(R.string.hint_search);
+            public Message resolveError(SpotifyError error){
+                return new Message(R.string.msg_search_hint);
             }
         });
     }
 
     @Override
-    protected void onMessageReceived(int type, Message message){
+    protected void onMessageReceived(int type, android.os.Message message){
         if(type == MESSAGE_TYPE_ARTISTS){
             if(message.obj != null && message.obj instanceof ArtistsPager){
                 artistList = SpotifyArtist.toSpotifyArtistList(((ArtistsPager) message.obj).artists.items);
                 searchAdapter.setArtists(artistList);
 
                 if(artistList == null || artistList.isEmpty()){
-                    displayError(Errors.ERROR_NO_ARTISTS);
+                    displayError(Messages.MESSAGE_NO_ARTISTS);
                 }else{
                     displayContent();
                 }
             }else{
-                displayError(Errors.ERROR_NO_ARTISTS);
+                displayError(Messages.MESSAGE_NO_ARTISTS);
             }
+        }else if(type == MESSAGE_TYPE_SEARCH){
+            search((String) message.obj);
         }
     }
 
@@ -134,6 +148,7 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
     public void onSaveInstanceState(Bundle outState){
         super.onSaveInstanceState(outState);
 
+        outState.putString(STATE_QUERY, lastQuery);
         outState.putParcelableArrayList(STATE_SPOTIFY_ARTIST_LIST, artistList);
         outState.putInt(STATE_LAST_SELECTED_POSITION, searchAdapter == null ? -1 : searchAdapter.getLastSelectedItemPosition());
     }
@@ -141,12 +156,13 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState){
         super.onRestoreInstanceState(savedInstanceState);
-
         if(savedInstanceState != null){
+            lastQuery = savedInstanceState.getString(STATE_QUERY);
             artistList = savedInstanceState.getParcelableArrayList(STATE_SPOTIFY_ARTIST_LIST);
             lastSelectedItemPosition = savedInstanceState.getInt(STATE_LAST_SELECTED_POSITION);
             if(searchAdapter != null){
                 searchAdapter.setArtists(artistList);
+                searchAdapter.activateItemAtPosition(lastSelectedItemPosition);
             }
         }
     }
@@ -183,7 +199,8 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
         }
     }
 
-    public interface OnSpotifyArtistSelectedListener{
+    public interface OnSpotifyArtistSelectedListener {
+
         public void onArtistSelected(SpotifyArtist artist);
     }
 }

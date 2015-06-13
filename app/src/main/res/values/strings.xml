@@ -8,11 +8,11 @@
     <string name="top_tracks">Top Tracks</string>
     <string name="unknown_artist">Unknown Artist</string>
 
-    <string name="error_no_internet">You\'re not connected to the internet</string>
-    <string name="error_no_artists_found">I couldn\'t find any artists. How about refining the search?</string>
-    <string name="error_no_tracks_found">I couldn\'t find any tracks</string>
+    <string name="msg_error_no_internet">You\'re not connected to the internet</string>
+    <string name="msg_error_no_artists_found">I couldn\'t find any artists. How about refining the search?</string>
+    <string name="msg_error_no_tracks_found">I couldn\'t find any tracks</string>
 
-    <string name="hint_search">Search for artists</string>
+    <string name="msg_search_hint">Search for artists</string>
 
     <string name="action_search">Search</string>
 
@@ -21,4 +21,5 @@
     <string name="label_next">next</string>
     <string name="label_pause">pause</string>
     <string name="label_play">play</string>
+    <string name="msg_no_artist_selected">No artist selected</string>
 </resources>

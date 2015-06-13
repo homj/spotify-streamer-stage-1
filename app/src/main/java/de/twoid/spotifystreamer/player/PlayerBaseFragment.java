@@ -13,6 +13,7 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.Palette.PaletteAsyncListener;
@@ -86,11 +87,13 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
 
             if(sessionAtService != null && sessionAtService.equals(session)){
                 session = sessionAtService;
+                onPlayerStateChanged(streamingService.getCurrentState());
+                onProgressChange(streamingService.getPlayerPosition());
             }else{
                 onSessionRequested();
             }
 
-            setTrackInfoToViews(streamingService.getCurrentTrack());
+            setTrack(streamingService.getCurrentTrack());
 
             streamingService.registerCallback(PlayerBaseFragment.this);
         }
@@ -102,19 +105,39 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
     };
 
     public PlayerBaseFragment(){
-
+        setRetainInstance(true);
     }
 
     protected abstract void onSessionRequested();
 
     @Override
-    public void onAttach(Activity activity){
-        super.onAttach(activity);
-        if(serviceIntent == null){
-            serviceIntent = new Intent(activity, PlayerService.class);
-            activity.bindService(serviceIntent, streamingConnection, Context.BIND_AUTO_CREATE);
-            activity.startService(serviceIntent);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState){
+        super.onActivityCreated(savedInstanceState);
+
+        if(savedInstanceState == null){
+            restoreSession(getArguments());
+        }else{
+            if(!restoreSession(savedInstanceState)){
+                restoreSession(getArguments());
+            }
         }
+        bindService();
+    }
+
+    private boolean restoreSession(Bundle bundle){
+        if(bundle == null ||!bundle.containsKey(ARG_SESSION)){
+            return false;
+        }else{
+            session = bundle.getParcelable(ARG_SESSION);
+            setTrack(session == null ? null : session.getCurrentTrack());
+            return true;
+        }
+    }
+
+    @Override
+    public void onDestroy(){
+        unbindService();
+        super.onDestroy();
     }
 
     @Override
@@ -123,15 +146,17 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
         super.onDestroyView();
     }
 
-    @Override
-    public void onDestroy() {
-        unbindService();
-        super.onDestroy();
+    public void bindService(){
+        if(serviceIntent == null){
+            serviceIntent = new Intent(getActivity(), PlayerService.class);
+        }
+
+        getActivity().bindService(serviceIntent, streamingConnection, Context.BIND_AUTO_CREATE);
     }
 
     public void unbindService(){
         if(streamingService != null){
-            streamingService.unregisterCallback(null);
+            streamingService.unregisterCallback(this);
             getActivity().unbindService(streamingConnection);
             streamingService = null;
         }
@@ -139,8 +164,8 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState){
-        areViewsCreated = true;
         super.onViewCreated(view, savedInstanceState);
+        areViewsCreated = true;
         onPlayerStateChanged(currentPlayerState);
     }
 
@@ -148,13 +173,6 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
     protected void initResources(){
         controlLayoutColor = controlLayoutColorFallback = getResources().getColor(R.color.branding);
         controlsColor = controlsColorFallback = getResources().getColor(R.color.accent);
-
-        Bundle arguments = getArguments();
-
-        if(arguments != null && arguments.containsKey(ARG_SESSION)){
-            session = arguments.getParcelable(ARG_SESSION);
-            setTrack(session.getCurrentTrack());
-        }
     }
 
     @Override
@@ -165,7 +183,6 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
     @Override
     protected void initViews(View root){
         ivPicture = (ImageView) root.findViewById(R.id.iv_picture);
-
         tvTrackName = (TextView) root.findViewById(R.id.tv_track_name);
         ivSkipPrevious = (ImageView) root.findViewById(R.id.iv_skip_previous);
         ivPlayPause = (ImageView) root.findViewById(R.id.iv_play_pause);
@@ -192,11 +209,17 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
                 skipToNext();
             }
         });
+        setTrackInfoToViews(session == null ? null : session.getCurrentTrack());
     }
 
-    private void setTrack(SpotifyTrack track){
-        session = streamingService == null ? null : streamingService.getSession();
-        artist = track.hasArtists() ? track.getFirstArtist() : (session == null ? null : session.getArtist());
+    protected void setTrack(SpotifyTrack track){
+        ensureSessionSynced();
+
+
+        if(track != null){
+            artist = track.hasArtists() ? track.getFirstArtist() : (session == null ? null : session.getArtist());
+            setProgress(0);
+        }
 
         if(areViewsCreated){
             setTrackInfoToViews(track);
@@ -244,7 +267,7 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
                 public void onGlobalLayout(){
                     Picasso.with(getActivity())
                             .load(getImage().url)
-                            .resize(ivPicture.getWidth(), ivPicture.getHeight())
+                            .fit()
                             .centerCrop()
                             .placeholder(R.drawable.ic_albumart_placeholder)
                             .into(ivPicture, PlayerBaseFragment.this);
@@ -293,31 +316,13 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
         return session.getCurrentTrack().hasImage();
     }
 
-    protected SpotifyImage getImage(){
-        if(hasImage()){
-            return session.getCurrentTrack().getLargestImage();
-        }
-
-        return null;
-    }
+    protected abstract SpotifyImage getImage();
 
     @Override
     public void onSaveInstanceState(Bundle outState){
         super.onSaveInstanceState(outState);
 
         outState.putParcelable(ARG_SESSION, session);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState){
-        super.onRestoreInstanceState(savedInstanceState);
-
-        if(savedInstanceState != null && savedInstanceState.containsKey(ARG_SESSION)){
-            session = savedInstanceState.getParcelable(ARG_SESSION);
-            if(session != null){
-                setTrack(session.getCurrentTrack());
-            }
-        }
     }
 
     @Override
@@ -370,5 +375,24 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
         }
 
         loadImage();
+    }
+
+    private void ensureSessionSynced(){
+        if(session == null){
+            if(streamingService == null){
+                return;
+            }
+
+            session = streamingService.getSession();
+            onPlayerStateChanged(streamingService.getCurrentState());
+            onProgressChange(streamingService.getPlayerPosition());
+        }else if(streamingService != null){
+            PlayerSession sessionAtService = streamingService.getSession();
+            if(!session.equals(sessionAtService)){
+                session = sessionAtService;
+                onPlayerStateChanged(streamingService.getCurrentState());
+                onProgressChange(streamingService.getPlayerPosition());
+            }
+        }
     }
 }

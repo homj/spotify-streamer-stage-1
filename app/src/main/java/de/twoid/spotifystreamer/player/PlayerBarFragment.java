@@ -20,14 +20,7 @@ public class PlayerBarFragment extends PlayerBaseFragment {
 
     private TextView tvArtistName;
     private View controlsView;
-
-    public static PlayerBarFragment getInstance(PlayerSession session){
-        PlayerBarFragment fragment = new PlayerBarFragment();
-        Bundle args = new Bundle();
-        args.putParcelable(ARG_SESSION, session);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private OnPlayerBarStateChangeListener playerBarStateChangeListener;
 
     public PlayerBarFragment(){
 
@@ -35,16 +28,8 @@ public class PlayerBarFragment extends PlayerBaseFragment {
 
     @Override
     protected void onSessionRequested(){
-        if(getView() != null){
-            getView().setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onTrackChanged(SpotifyTrack track){
-        super.onTrackChanged(track);
-        if(getView() != null && getView().getVisibility() != View.VISIBLE){
-            getView().setVisibility(View.VISIBLE);
+        if(playerBarStateChangeListener != null){
+            playerBarStateChangeListener.onHidePlayerBar();
         }
     }
 
@@ -83,6 +68,23 @@ public class PlayerBarFragment extends PlayerBaseFragment {
         return null;
     }
 
+    public void setPlayerBarStateChangeListener(OnPlayerBarStateChangeListener playerBarStateChangeListener){
+        this.playerBarStateChangeListener = playerBarStateChangeListener;
+    }
+
+    @Override
+    protected void setTrack(SpotifyTrack track){
+        super.setTrack(track);
+
+        if(playerBarStateChangeListener != null){
+            if(track == null){
+                playerBarStateChangeListener.onHidePlayerBar();
+            }else{
+                playerBarStateChangeListener.onShowPlayerBar();
+            }
+        }
+    }
+
     protected void setTrackInfoToViews(SpotifyTrack track){
         super.setTrackInfoToViews(track);
         if(!areViewsCreated){
@@ -94,5 +96,10 @@ public class PlayerBarFragment extends PlayerBaseFragment {
         }else{
             tvArtistName.setText(artist.name);
         }
+    }
+
+    public static interface OnPlayerBarStateChangeListener {
+        public void onHidePlayerBar();
+        public void onShowPlayerBar();
     }
 }

@@ -19,7 +19,7 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import de.twoid.spotifystreamer.Error;
+import de.twoid.spotifystreamer.Message;
 import de.twoid.spotifystreamer.R;
 
 /**
@@ -47,7 +47,7 @@ public class EmptyLayout extends FrameLayout {
     private int currentState;
     @State
     private int pendingState = INVALID_STATE;
-    private de.twoid.spotifystreamer.Error error;
+    private Message message;
     private boolean isAnimating = false;
 
     public EmptyLayout(Context context){
@@ -74,9 +74,9 @@ public class EmptyLayout extends FrameLayout {
                 if(messageResId != -1){
                     int drawableResId = ta.getResourceId(R.styleable.EmptyLayout_error_image, -1);
                     if(drawableResId != -1){
-                        error = new Error(messageResId, drawableResId);
+                        message = new Message(messageResId, drawableResId);
                     }else{
-                        error = new Error(messageResId);
+                        message = new Message(messageResId);
                     }
                 }
 
@@ -108,22 +108,22 @@ public class EmptyLayout extends FrameLayout {
         loadingProgressBar = (ProgressBar) findViewById(R.id.loading_progressbar);
         tvError = (TextView) findViewById(R.id.tv_error);
 
-        setError(error);
+        setMessage(message);
     }
 
     public void setError(@StringRes int errorTextResId, @DrawableRes int errorImageResId){
-        setError(new Error(errorTextResId, errorImageResId));
+        setMessage(new Message(errorTextResId, errorImageResId));
     }
 
-    public void setError(Error error){
-        this.error = error;
+    public void setMessage(Message message){
+        this.message = message;
 
-        if(error == null){
+        if(message == null){
             tvError.setText(null);
             tvError.setCompoundDrawables(null, null, null, null);
         }else{
-            error.applyText(tvError);
-            error.applyImage(tvError);
+            message.applyText(tvError);
+            message.applyImage(tvError);
         }
     }
 
@@ -242,7 +242,7 @@ public class EmptyLayout extends FrameLayout {
         Parcelable parentState = super.onSaveInstanceState();
 
         SavedState savedState = new SavedState(parentState);
-        savedState.error = error;
+        savedState.message = message;
         savedState.state = currentState;
 
         return savedState;
@@ -253,19 +253,19 @@ public class EmptyLayout extends FrameLayout {
         SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
 
-        setError(error);
+        setMessage(message);
         setState(savedState.state);
     }
 
     private static class SavedState extends BaseSavedState {
 
-        private Error error;
+        private Message message;
         @State
         private int state;
 
         public SavedState(Parcel source){
             super(source);
-            error = source.readParcelable(Error.class.getClassLoader());
+            message = source.readParcelable(Message.class.getClassLoader());
             state = matchState(source.readInt());
         }
 
@@ -276,7 +276,7 @@ public class EmptyLayout extends FrameLayout {
         @Override
         public void writeToParcel(Parcel out, int flags){
             super.writeToParcel(out, flags);
-            out.writeParcelable(error, flags);
+            out.writeParcelable(message, flags);
             out.writeInt(state);
         }
 

@@ -1,7 +1,6 @@
 package de.twoid.spotifystreamer;
 
 import android.os.Handler;
-import android.os.Message;
 
 import de.twoid.spotifystreamer.util.NetworkUtils;
 import de.twoid.spotifystreamer.widget.EmptyLayout;
@@ -36,11 +35,11 @@ public abstract class SpotifyFragment extends BaseFragment implements Handler.Ca
     }
 
     @Override
-    public boolean handleMessage(Message msg){
+    public boolean handleMessage(android.os.Message msg){
         if(msg != null){
             switch(msg.what){
                 case MESSAGE_TYPE_ERROR:
-                    displayError((Error) msg.obj);
+                    displayError((Message) msg.obj);
                     break;
                 default:
                     onMessageReceived(msg.what, msg);
@@ -49,7 +48,7 @@ public abstract class SpotifyFragment extends BaseFragment implements Handler.Ca
         return false;
     }
 
-    protected abstract void onMessageReceived(int type, Message message);
+    protected abstract void onMessageReceived(int type, android.os.Message message);
 
     protected void displayLoading(){
         if(emptyLayout != null){
@@ -57,9 +56,9 @@ public abstract class SpotifyFragment extends BaseFragment implements Handler.Ca
         }
     }
 
-    protected void displayError(Error error){
+    protected void displayError(Message message){
         if(emptyLayout != null){
-            emptyLayout.setError(error);
+            emptyLayout.setMessage(message);
             emptyLayout.setState(EmptyLayout.STATE_DISPLAY_ERROR);
         }
     }
@@ -78,7 +77,7 @@ public abstract class SpotifyFragment extends BaseFragment implements Handler.Ca
 
         @Override
         public void success(T t, Response response){
-            Message message = Message.obtain();
+            android.os.Message message = android.os.Message.obtain();
             message.what = getSuccessMessageType();
             message.obj = t;
             mHandler.sendMessage(message);
@@ -86,7 +85,7 @@ public abstract class SpotifyFragment extends BaseFragment implements Handler.Ca
 
         @Override
         public void failure(SpotifyError error){
-            Message message = Message.obtain();
+            android.os.Message message = android.os.Message.obtain();
             message.what = MESSAGE_TYPE_ERROR;
             message.obj = resolveError(error);
             mHandler.sendMessage(message);
@@ -94,6 +93,6 @@ public abstract class SpotifyFragment extends BaseFragment implements Handler.Ca
 
         public abstract int getSuccessMessageType();
 
-        public abstract Error resolveError(SpotifyError error);
+        public abstract Message resolveError(SpotifyError error);
     }
 }

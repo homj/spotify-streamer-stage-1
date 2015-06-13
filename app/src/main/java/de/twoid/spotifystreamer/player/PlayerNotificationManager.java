@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.NotificationCompat;
+import android.support.v7.app.NotificationCompat.MediaStyle;
 import android.util.Log;
 
 import com.squareup.picasso.Picasso;
@@ -57,6 +58,7 @@ public class PlayerNotificationManager extends BroadcastReceiver {
     public static final String ACTION_PLAY = "de.twoid.spotifystreamer.action.PLAY";
     public static final String ACTION_PREV = "de.twoid.spotifystreamer.action.SKIP_PREVIOUS";
     public static final String ACTION_NEXT = "de.twoid.spotifystreamer.action.SKIP_NEXT";
+    public static final String ACTION_STOP = "de.twoid.spotifystreamer.action.STOP";
 
     private final PlayerService mService;
 
@@ -70,6 +72,7 @@ public class PlayerNotificationManager extends BroadcastReceiver {
     private PendingIntent mPlayIntent;
     private PendingIntent mPreviousIntent;
     private PendingIntent mNextIntent;
+    private PendingIntent mStopIntent;
 
     private int mNotificationColor;
 
@@ -94,6 +97,8 @@ public class PlayerNotificationManager extends BroadcastReceiver {
                 new Intent(ACTION_PREV).setPackage(pkg), PendingIntent.FLAG_CANCEL_CURRENT);
         mNextIntent = PendingIntent.getBroadcast(mService, REQUEST_CODE,
                 new Intent(ACTION_NEXT).setPackage(pkg), PendingIntent.FLAG_CANCEL_CURRENT);
+        mStopIntent = PendingIntent.getBroadcast(mService, REQUEST_CODE,
+                new Intent(ACTION_STOP).setPackage(pkg), PendingIntent.FLAG_CANCEL_CURRENT);
 
         // Cancel all notifications to handle the case where the Service was killed and
         // restarted by the system.
@@ -166,6 +171,9 @@ public class PlayerNotificationManager extends BroadcastReceiver {
                 break;
             case ACTION_PREV:
                 mService.skipToPrevious();
+                break;
+            case ACTION_STOP:
+                mService.stop();
                 break;
             default:
         }
@@ -259,10 +267,8 @@ public class PlayerNotificationManager extends BroadcastReceiver {
         Bitmap image = BitmapFactory.decodeResource(mService.getResources(), R.drawable.ic_albumart_placeholder);
 
         notificationBuilder
-                .setStyle(new NotificationCompat.MediaStyle()
-                        .setShowActionsInCompactView(playPauseButtonPosition)  // show only play/pause in compact view
-                        //                        .setMediaSession(mSessionToken)
-                )
+                .setStyle(new MediaStyle().setShowActionsInCompactView(playPauseButtonPosition))
+                .setDeleteIntent(mStopIntent)
                 .setColor(mNotificationColor)
                 .setSmallIcon(R.drawable.ic_play_24dp)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -315,6 +321,9 @@ public class PlayerNotificationManager extends BroadcastReceiver {
 
         // Make sure that the notification can be dismissed by the user when we are not playing:
         builder.setOngoing(playerState == STATE_STARTED);
+        if(playerState == StatefulMediaPlayer.STATE_PAUSED){
+            mService.stopForeground(false);
+        }
     }
 
     private void loadImage(final String bitmapUrl, final NotificationCompat.Builder builder){

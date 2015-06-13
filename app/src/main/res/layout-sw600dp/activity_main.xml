@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:showDividers="none"
-    tools:context="de.twoid.spotifystreamer.MainActivity">
+    tools:context="de.twoid.spotifystreamer.MainActivity"
+    android:layout_marginBottom="-64dp">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -65,14 +66,12 @@
 
     </LinearLayout>
 
-
-
-    <fragment
-        android:id="@+id/player_bar_fragment"
-        android:name="de.twoid.spotifystreamer.player.PlayerBarFragment"
+    <FrameLayout
+        android:id="@+id/player_bar_container"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:layout_marginBottom="-64dp"
-        tools:layout="@layout/fragment_player_bar"/>
+        android:visibility="gone"
+        tools:background="@color/branding"/>
+
 </LinearLayout>
 
