@@ -38,7 +38,7 @@
             android:layout_marginTop="@dimen/default_spacing"
             android:layout_gravity="center_horizontal"
             android:textAppearance="@style/TextAppearance.AppCompat.Title.Inverse"
-            android:text="track"/>
+            tools:text="track"/>
 
         <SeekBar
             android:id="@+id/seekbar"

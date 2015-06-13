@@ -27,7 +27,6 @@ import de.twoid.spotifystreamer.object.PlayerSession;
 import de.twoid.spotifystreamer.object.SpotifyTrack;
 import de.twoid.spotifystreamer.player.StatefulMediaPlayer.OnStateChangeListener;
 import de.twoid.spotifystreamer.player.StatefulMediaPlayer.State;
-import de.twoid.spotifystreamer.util.MathUtils;
 
 import static de.twoid.spotifystreamer.player.StatefulMediaPlayer.STATE_PAUSED;
 import static de.twoid.spotifystreamer.player.StatefulMediaPlayer.STATE_PREPARING;
@@ -163,7 +162,7 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
      * Set a {@link PlayerSession} and prepare it for playback.
      * This method prepares the current track in the sessions' playlist and calls {@link #play()} if immediate playback is requested;
      *
-     * @param session
+     * @param session the session to prepare
      */
     public void setSession(PlayerSession session){
         setSession(session, false);
@@ -173,7 +172,8 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
      * Set a {@link PlayerSession} and prepare it for playback.
      * This method prepares the current track in the sessions' playlist and calls {@link #play()} if immediate playback is requested;
      *
-     * @param session
+     * @param session          the session to prepare
+     * @param playWhenPrepared whether to immediately start playing once the session has been prepared
      */
     public void setSession(PlayerSession session, boolean playWhenPrepared){
         this.session = session;
@@ -189,27 +189,27 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
         preparePlaying(session.getCurrentTrack());
     }
 
-//    /**
-//     * Prepares the song at positionInPlaylist in the playlist and calls {@link #play()} if immediate playback is requested.
-//     *
-//     * @param positionInPlaylist the position of the song in the playlist that should be prepared
-//     */
-//    private void setSongAtPositionInPlaylist(int positionInPlaylist){
-//        if(playlist == null || playlist.isEmpty() || positionInPlaylist < 0 || positionInPlaylist > playlist.size() - 1){
-//            releaseAndStop();
-//        }
-//
-//        SpotifyTrack track = playlist.get(positionInPlaylist);
-//        if(callbacks != null){
-//            for(Callback callback : callbacks){
-//                callback.onTrackChanged(track);
-//            }
-//        }
-//
-//        ensureMediaPlayerInIdleState();
-//        ensureWifiLockHeld();
-//        preparePlaying(track);
-//    }
+    //    /**
+    //     * Prepares the song at positionInPlaylist in the playlist and calls {@link #play()} if immediate playback is requested.
+    //     *
+    //     * @param positionInPlaylist the position of the song in the playlist that should be prepared
+    //     */
+    //    private void setSongAtPositionInPlaylist(int positionInPlaylist){
+    //        if(playlist == null || playlist.isEmpty() || positionInPlaylist < 0 || positionInPlaylist > playlist.size() - 1){
+    //            releaseAndStop();
+    //        }
+    //
+    //        SpotifyTrack track = playlist.get(positionInPlaylist);
+    //        if(callbacks != null){
+    //            for(Callback callback : callbacks){
+    //                callback.onTrackChanged(track);
+    //            }
+    //        }
+    //
+    //        ensureMediaPlayerInIdleState();
+    //        ensureWifiLockHeld();
+    //        preparePlaying(track);
+    //    }
 
     private void setNextTrack(){
         SpotifyTrack track = session.getNextTrack();
@@ -249,8 +249,9 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
     }
 
     /**
-     * Get the current state of the mediaplayer
-     * @return
+     * Get the current state of the {@linkplain MediaPlayer media player}
+     *
+     * @return the current {@linkplain State state} of the {@linkplain MediaPlayer media player}
      */
     @State
     public int getCurrentState(){
@@ -342,7 +343,8 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
 
     /**
      * Seek the current song to the specified milliseconds
-     * @param milliseconds
+     *
+     * @param milliseconds the millisecodns to seek to
      */
     public void seekTo(int milliseconds){
         mediaPlayer.seekTo(milliseconds);
@@ -350,7 +352,8 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
 
     /**
      * Set whether the progress of the current song should be watched and passed to specified {@linkplain de.twoid.spotifystreamer.player.PlayerService.Callback callbacks}
-     * @param watchProgress
+     *
+     * @param watchProgress whether the progress should be watched
      */
     private void setWatchProgress(boolean watchProgress){
         watchProgressUpdate = watchProgress;
@@ -401,6 +404,7 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
 
     /**
      * Check whether there is a next track in the playlist
+     *
      * @return true if there is a next track to play, false otherwise
      */
     public boolean canPlayNextTrack(){
@@ -420,6 +424,7 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
 
     /**
      * Check whether there is a previous track in the playlist
+     *
      * @return true if there is a previous track to play, false otherwise
      */
     public boolean canPlayPreviousTrack(){
@@ -463,6 +468,7 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
 
     /**
      * Preparse a track for playback
+     *
      * @param track the track to prepare
      */
     private void preparePlaying(@NonNull SpotifyTrack track){
@@ -563,25 +569,28 @@ public class PlayerService extends Service implements OnPreparedListener, OnComp
 
         /**
          * Called when the progress of a track has changed
+         *
          * @param progress the progress of the track in milliseconds
          */
-        public void onProgressChange(int progress);
+        void onProgressChange(int progress);
 
         /**
          * Called when a new track is set
+         *
          * @param track the new track to be played
          */
-        public void onTrackChanged(SpotifyTrack track);
+        void onTrackChanged(SpotifyTrack track);
 
         /**
          * Called when the playlist is completed and playback stopped
          */
-        public void onPlaybackStopped();
+        void onPlaybackStopped();
 
         /**
          * Called when the {@linkplain StatefulMediaPlayer mediaplayer} switched to a new {{@linkplain StatefulMediaPlayer.State state}}
-         * @param newState
+         *
+         * @param newState the new {{@linkplain StatefulMediaPlayer.State state
          */
-        public void onPlayerStateChanged(@State int newState);
+        void onPlayerStateChanged(@State int newState);
     }
 }

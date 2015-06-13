@@ -1,6 +1,5 @@
 package de.twoid.spotifystreamer.search.viewholder;
 
-import android.content.Intent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -11,7 +10,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import de.twoid.spotifystreamer.artist.ArtistActivity;
 import de.twoid.spotifystreamer.ItemListAdapter.ItemViewHolder;
 import de.twoid.spotifystreamer.R;
 import de.twoid.spotifystreamer.object.SpotifyArtist;
@@ -49,9 +47,6 @@ public class ArtistViewHolder extends ItemViewHolder<SpotifyArtist> {
                 @Override
                 public void onClick(View v){
                     clickListener.onChildClick(v, artist);
-//                    Intent intent = new Intent(v.getContext(), ArtistActivity.class);
-//                    intent.putExtra(ArtistActivity.EXTRA_SPOTIFY_ARTIST, artist);
-//                    v.getContext().startActivity(intent);
                 }
             });
             itemView.setSelected(isSelected);

@@ -1,13 +1,11 @@
 package de.twoid.spotifystreamer.player;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import de.twoid.spotifystreamer.R;
-import de.twoid.spotifystreamer.object.PlayerSession;
 import de.twoid.spotifystreamer.object.SpotifyImage;
 import de.twoid.spotifystreamer.object.SpotifyTrack;
 
@@ -98,8 +96,9 @@ public class PlayerBarFragment extends PlayerBaseFragment {
         }
     }
 
-    public static interface OnPlayerBarStateChangeListener {
-        public void onHidePlayerBar();
-        public void onShowPlayerBar();
+    public interface OnPlayerBarStateChangeListener {
+
+        void onHidePlayerBar();
+        void onShowPlayerBar();
     }
 }

@@ -27,12 +27,14 @@
             android:id="@+id/tv_track_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             style="@style/TextAppearance.AppCompat.Body2"/>
 
         <TextView
             android:id="@+id/tv_artist_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             style="@style/TextAppearance.AppCompat.Body1"/>
 
     </LinearLayout>
@@ -46,7 +48,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:focusable="true"
             android:clickable="true"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"
+            android:contentDescription="@string/label_previous"/>
 
         <ImageView
             android:id="@+id/iv_play_pause"
@@ -57,7 +60,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:focusable="true"
             android:clickable="true"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"
+            android:contentDescription="@string/label_play"/>
 
         <ImageView
             android:id="@+id/iv_skip_next"
@@ -68,5 +72,6 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:focusable="true"
             android:clickable="true"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"
+            android:contentDescription="@string/label_next"/>
 </LinearLayout>

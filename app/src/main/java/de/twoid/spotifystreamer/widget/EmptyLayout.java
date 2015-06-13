@@ -30,10 +30,10 @@ public class EmptyLayout extends FrameLayout {
     public static final int INVALID_STATE = -1;
     public static final int STATE_DISPLAY_CONTENT = 0;
     public static final int STATE_DISPLAY_LOADING = 1;
-    public static final int STATE_DISPLAY_ERROR = 2;
+    public static final int STATE_DISPLAY_MESSAGE = 2;
 
 
-    @IntDef({STATE_DISPLAY_CONTENT, STATE_DISPLAY_ERROR, STATE_DISPLAY_LOADING, INVALID_STATE})
+    @IntDef({STATE_DISPLAY_CONTENT, STATE_DISPLAY_MESSAGE, STATE_DISPLAY_LOADING, INVALID_STATE})
     public @interface State {
 
     }
@@ -41,7 +41,7 @@ public class EmptyLayout extends FrameLayout {
     private static final Interpolator INTERPOLATOR = new AccelerateDecelerateInterpolator();
 
     private ProgressBar loadingProgressBar;
-    private TextView tvError;
+    private TextView tvMessage;
 
     @State
     private int currentState;
@@ -95,8 +95,8 @@ public class EmptyLayout extends FrameLayout {
                 return STATE_DISPLAY_CONTENT;
             case STATE_DISPLAY_LOADING:
                 return STATE_DISPLAY_LOADING;
-            case STATE_DISPLAY_ERROR:
-                return STATE_DISPLAY_ERROR;
+            case STATE_DISPLAY_MESSAGE:
+                return STATE_DISPLAY_MESSAGE;
             default:
                 return STATE_DISPLAY_CONTENT;
         }
@@ -106,12 +106,12 @@ public class EmptyLayout extends FrameLayout {
     protected void onFinishInflate(){
         super.onFinishInflate();
         loadingProgressBar = (ProgressBar) findViewById(R.id.loading_progressbar);
-        tvError = (TextView) findViewById(R.id.tv_error);
-
+        tvMessage = (TextView) findViewById(R.id.tv_error);
+        tvMessage.setCompoundDrawablePadding(tvMessage.getResources().getDimensionPixelOffset(R.dimen.default_spacing));
         setMessage(message);
     }
 
-    public void setError(@StringRes int errorTextResId, @DrawableRes int errorImageResId){
+    public void setMessage(@StringRes int errorTextResId, @DrawableRes int errorImageResId){
         setMessage(new Message(errorTextResId, errorImageResId));
     }
 
@@ -119,11 +119,11 @@ public class EmptyLayout extends FrameLayout {
         this.message = message;
 
         if(message == null){
-            tvError.setText(null);
-            tvError.setCompoundDrawables(null, null, null, null);
+            tvMessage.setText(null);
+            tvMessage.setCompoundDrawables(null, null, null, null);
         }else{
-            message.applyText(tvError);
-            message.applyImage(tvError);
+            message.applyText(tvMessage);
+            message.applyImage(tvMessage);
         }
     }
 
@@ -144,18 +144,18 @@ public class EmptyLayout extends FrameLayout {
         pendingState = INVALID_STATE;
 
         switch(state){
-            case STATE_DISPLAY_ERROR:
-                showView(tvError, animate);
+            case STATE_DISPLAY_MESSAGE:
+                showView(tvMessage, animate);
                 hideView(loadingProgressBar, animate);
                 hideContent(animate);
                 break;
             case STATE_DISPLAY_LOADING:
-                hideView(tvError, animate);
+                hideView(tvMessage, animate);
                 showView(loadingProgressBar, animate);
                 hideContent(animate);
                 break;
             case STATE_DISPLAY_CONTENT:
-                hideView(tvError, animate);
+                hideView(tvMessage, animate);
                 hideView(loadingProgressBar, animate);
                 showContent(animate);
                 break;
@@ -187,7 +187,7 @@ public class EmptyLayout extends FrameLayout {
     }
 
     private void hideContent(boolean animate){
-        switchContentVisibility(View.GONE, animate);
+        switchContentVisibility(View.INVISIBLE, animate);
     }
 
     private void showContent(boolean animate){
@@ -274,7 +274,7 @@ public class EmptyLayout extends FrameLayout {
         }
 
         @Override
-        public void writeToParcel(Parcel out, int flags){
+        public void writeToParcel(@NonNull Parcel out, int flags){
             super.writeToParcel(out, flags);
             out.writeParcelable(message, flags);
             out.writeInt(state);

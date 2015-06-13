@@ -16,4 +16,6 @@
     <dimen name="toolbar_elevation">4dp</dimen>
     <dimen name="notification_height">112dp</dimen>
     <dimen name="player_control_button_size_notification">48dp</dimen>
+    <dimen name="artist_item_margin_left">88dp</dimen>
+    <dimen name="artist_toolbar_height">384dp</dimen>
 </resources>

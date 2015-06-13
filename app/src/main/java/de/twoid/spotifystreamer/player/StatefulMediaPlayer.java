@@ -7,7 +7,6 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
 import android.support.annotation.IntDef;
-import android.widget.ListView;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -16,7 +15,8 @@ import java.util.Map;
 /**
  * Created by Johannes on 04.06.2015.
  */
-public class StatefulMediaPlayer extends MediaPlayer implements OnPreparedListener, OnCompletionListener, OnErrorListener{
+public class StatefulMediaPlayer extends MediaPlayer implements OnPreparedListener, OnCompletionListener, OnErrorListener {
+
     public static final int STATE_NONE = -1;
     public static final int STATE_IDLE = 0;
     public static final int STATE_INITIALIZED = 1;
@@ -30,7 +30,9 @@ public class StatefulMediaPlayer extends MediaPlayer implements OnPreparedListen
     public static final int STATE_END = 9;
 
     @IntDef({STATE_NONE, STATE_IDLE, STATE_INITIALIZED, STATE_PREPARING, STATE_PREPARED, STATE_STARTED, STATE_PAUSED, STATE_STOPPED, STATE_PLAYBACK_COMPLETED, STATE_ERROR, STATE_END})
-    public @interface State{}
+    public @interface State {
+
+    }
 
     @State
     private int currentState = STATE_NONE;
@@ -133,7 +135,7 @@ public class StatefulMediaPlayer extends MediaPlayer implements OnPreparedListen
     }
 
     @Override
-    public void prepare() throws IOException, IllegalStateException {
+    public void prepare() throws IOException, IllegalStateException{
         if(canSwitchToState(STATE_PREPARED)){
             super.prepare();
             setState(STATE_PREPARED);
@@ -177,7 +179,7 @@ public class StatefulMediaPlayer extends MediaPlayer implements OnPreparedListen
     }
 
     @Override
-    public void setDataSource(final String path) throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+    public void setDataSource(final String path) throws IOException, IllegalArgumentException, SecurityException, IllegalStateException{
         if(canSwitchToState(STATE_INITIALIZED)){
             super.setDataSource(path);
             setState(STATE_INITIALIZED);
@@ -197,7 +199,7 @@ public class StatefulMediaPlayer extends MediaPlayer implements OnPreparedListen
     }
 
     @Override
-    public void setDataSource(final Context context, final Uri uri, final Map<String, String> headers) throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+    public void setDataSource(final Context context, final Uri uri, final Map<String, String> headers) throws IOException, IllegalArgumentException, SecurityException, IllegalStateException{
         if(canSwitchToState(STATE_INITIALIZED)){
             super.setDataSource(context, uri, headers);
             setState(STATE_INITIALIZED);
@@ -207,7 +209,7 @@ public class StatefulMediaPlayer extends MediaPlayer implements OnPreparedListen
     }
 
     @Override
-    public void setDataSource(final FileDescriptor fd) throws IOException, IllegalArgumentException, IllegalStateException {
+    public void setDataSource(final FileDescriptor fd) throws IOException, IllegalArgumentException, IllegalStateException{
         if(canSwitchToState(STATE_INITIALIZED)){
             super.setDataSource(fd);
             setState(STATE_INITIALIZED);
@@ -297,7 +299,8 @@ public class StatefulMediaPlayer extends MediaPlayer implements OnPreparedListen
         return false;
     }
 
-    public static interface OnStateChangeListener{
-        public void onStateChanged(@State int newState);
+    public interface OnStateChangeListener {
+
+        void onStateChanged(@State int newState);
     }
 }

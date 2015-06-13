@@ -27,13 +27,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.app.NotificationCompat.MediaStyle;
-import android.util.Log;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Picasso.LoadedFrom;
 import com.squareup.picasso.Target;
-
-import java.util.ArrayList;
 
 import de.twoid.spotifystreamer.R;
 import de.twoid.spotifystreamer.object.SpotifyTrack;
@@ -50,7 +47,6 @@ import static de.twoid.spotifystreamer.player.StatefulMediaPlayer.STATE_STOPPED;
  * as a base to create this PlayerNotificationManager
  */
 public class PlayerNotificationManager extends BroadcastReceiver {
-    private static final String TAG = "PlayerNotificationMngr";
     private static final int NOTIFICATION_ID = 368;
     private static final int REQUEST_CODE = 100;
 
@@ -114,13 +110,10 @@ public class PlayerNotificationManager extends BroadcastReceiver {
         currentTrack = mService.getCurrentTrack();
         playerState = mService.getCurrentState();
 
-        Log.d(TAG, "startNotification");
         if(!mStarted){
-            Log.d(TAG, "startNotification -> not started -> try createNotification");
             // The notification must be updated after setting started to true
             Notification notification = createNotification();
             if(notification != null){
-                Log.d(TAG, "startNotification -> not started -> notification created -> display");
                 mService.registerCallback(mCb);
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(ACTION_NEXT);
@@ -131,9 +124,6 @@ public class PlayerNotificationManager extends BroadcastReceiver {
 
                 mService.startForeground(NOTIFICATION_ID, notification);
                 mStarted = true;
-            }else{
-
-                Log.d(TAG, "startNotification -> not started -> notification not created!");
             }
         }
     }

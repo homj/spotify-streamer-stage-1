@@ -11,13 +11,12 @@ import retrofit.client.Response;
 
 /**
  * Created by Johannes on 01.06.2015.
- *
+ * <p/>
  * Offers easy access to the {@link SpotifyApi}
  */
 public abstract class SpotifyFragment extends BaseFragment implements Handler.Callback {
 
     protected static final int MESSAGE_TYPE_ERROR = -1;
-    private SpotifyApi api;
     protected SpotifyService spotify;
     protected Handler mHandler;
 
@@ -25,7 +24,7 @@ public abstract class SpotifyFragment extends BaseFragment implements Handler.Ca
 
     @Override
     protected void initResources(){
-        api = new SpotifyApi();
+        SpotifyApi api = new SpotifyApi();
         spotify = api.getService();
         mHandler = new Handler(this);
     }
@@ -39,7 +38,7 @@ public abstract class SpotifyFragment extends BaseFragment implements Handler.Ca
         if(msg != null){
             switch(msg.what){
                 case MESSAGE_TYPE_ERROR:
-                    displayError((Message) msg.obj);
+                    displayMessage((Message) msg.obj);
                     break;
                 default:
                     onMessageReceived(msg.what, msg);
@@ -56,10 +55,10 @@ public abstract class SpotifyFragment extends BaseFragment implements Handler.Ca
         }
     }
 
-    protected void displayError(Message message){
+    protected void displayMessage(Message message){
         if(emptyLayout != null){
             emptyLayout.setMessage(message);
-            emptyLayout.setState(EmptyLayout.STATE_DISPLAY_ERROR);
+            emptyLayout.setState(EmptyLayout.STATE_DISPLAY_MESSAGE);
         }
     }
 

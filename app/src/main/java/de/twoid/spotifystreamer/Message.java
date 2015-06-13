@@ -19,10 +19,14 @@ public class Message implements Parcelable {
     private static final int BY_OBJECT = 1;
 
     @IntDef({NOT_SET, BY_RES_ID, BY_OBJECT})
-    private @interface TextState{}
+    private @interface TextState {
+
+    }
 
     @IntDef({NOT_SET, BY_RES_ID})
-    private @interface ImageState{}
+    private @interface ImageState {
+
+    }
 
     @StringRes
     private int errorTextResId;
@@ -106,10 +110,10 @@ public class Message implements Parcelable {
         if(textView != null){
             switch(imageState){
                 case BY_RES_ID:
-                    textView.setCompoundDrawables(null, UiUtils.getDrawable(textView.getResources(), errorImageResId), null, null);
+                    textView.setCompoundDrawablesWithIntrinsicBounds(null, UiUtils.getDrawable(textView.getResources(), errorImageResId), null, null);
                     break;
                 default:
-                    textView.setCompoundDrawables(null, null, null, null);
+                    textView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
                     break;
             }
         }

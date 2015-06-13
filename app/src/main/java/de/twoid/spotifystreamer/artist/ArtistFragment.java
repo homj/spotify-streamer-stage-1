@@ -53,6 +53,7 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
     private ArrayList<SpotifyTrack> trackList;
     private TrackAdapter trackAdapter;
 
+    private EmptyLayout rootEmptyLayout;
     private CollapsingToolbarLayout collapsingToolbar;
     private ImageView ivPicture;
     private Toolbar toolbar;
@@ -86,40 +87,23 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
     @Override
     protected void setupResources(){
         trackAdapter.setOnItemClickListener(this);
-        artist = getArguments().getParcelable(ARG_SPOTIFY_ARTIST);
-
-        if(artist == null){
-            displayError(Messages.MESSAGE_NO_ARTISTS);
-        }else if(!isConnectedToInternet()){
-            displayError(Messages.MESSAGE_NO_INTERNET);
-        }else{
-            displayLoading();
-
-            Map<String, Object> options = new HashMap<>(1);
-            options.put("country", "DE");
-            spotify.getArtistTopTrack(artist.id, options, new SpotifyCallback<Tracks>() {
-
-                @Override
-                public int getSuccessMessageType(){
-                    return MESSAGE_TYPE_TRACKS;
-                }
-
-                @Override
-                public de.twoid.spotifystreamer.Message resolveError(SpotifyError error){
-                    return Messages.MESSAGE_NO_TRACKS;
-                }
-            });
-        }
     }
 
     public void setArtist(SpotifyArtist artist){
+        if(artist == null){
+            displayRootMessage(Messages.MESSAGE_NO_ARTIST_SELECTED);
+            return;
+        }else{
+            displayRootContent();
+        }
+
         if(this.artist == artist){
             return;
         }
 
         this.artist = artist;
         if(!isConnectedToInternet()){
-            displayError(Messages.MESSAGE_NO_INTERNET);
+            displayMessage(Messages.MESSAGE_NO_INTERNET);
         }else{
             displayLoading();
 
@@ -144,6 +128,7 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
 
     @Override
     protected void initViews(View root){
+        rootEmptyLayout = (EmptyLayout) root.findViewById(R.id.root_empty_layout);
         toolbar = (Toolbar) root.findViewById(R.id.toolbar);
         tracksRecyclerView = (RecyclerView) root.findViewById(R.id.tracks_recyclerview);
         setEmptyLayout((EmptyLayout) root.findViewById(R.id.empty_layout));
@@ -156,6 +141,9 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
 
     @Override
     protected void setupViews(){
+        rootEmptyLayout.setState(EmptyLayout.STATE_DISPLAY_MESSAGE);
+        setArtist(getArguments() == null ? null : (SpotifyArtist) getArguments().getParcelable(ARG_SPOTIFY_ARTIST));
+        rootEmptyLayout.setMessage(Messages.MESSAGE_NO_ARTIST_SELECTED);
         //        setArtistToToolbar();
         //        toolbar.setSubtitle(R.string.top_tracks);
         if(getActivity() != null && getActivity() instanceof AppCompatActivity){
@@ -271,5 +259,18 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
         Intent intent = new Intent(getActivity(), PlayerActivity.class);
         intent.putExtra(PlayerActivity.EXTRA_SESSION, new PlayerSession(artist, trackList, trackList.indexOf(track)));
         startActivity(intent);
+    }
+
+    private void displayRootMessage(de.twoid.spotifystreamer.Message message){
+        if(rootEmptyLayout != null){
+            rootEmptyLayout.setMessage(message);
+            rootEmptyLayout.setState(EmptyLayout.STATE_DISPLAY_MESSAGE);
+        }
+    }
+
+    private void displayRootContent(){
+        if(rootEmptyLayout != null){
+            rootEmptyLayout.setState(EmptyLayout.STATE_DISPLAY_CONTENT);
+        }
     }
 }

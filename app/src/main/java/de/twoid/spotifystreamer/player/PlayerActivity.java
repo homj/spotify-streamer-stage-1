@@ -11,10 +11,9 @@ import android.view.MenuItem;
 
 import de.twoid.spotifystreamer.R;
 import de.twoid.spotifystreamer.object.PlayerSession;
-import de.twoid.spotifystreamer.object.SpotifyTrack;
-import de.twoid.spotifystreamer.player.PlayerFragment;
 
 public class PlayerActivity extends AppCompatActivity {
+
     public static final String EXTRA_SESSION = "de.twoid.spotifystreamer.extra.SESSION";
 
     @Override

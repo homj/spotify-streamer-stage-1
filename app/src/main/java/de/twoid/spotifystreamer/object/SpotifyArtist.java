@@ -61,7 +61,7 @@ public class SpotifyArtist extends SpotifyArtistSimple implements Parcelable {
             return null;
         }
 
-        return images.get(images.size()-1);
+        return images.get(images.size() - 1);
     }
 
     @Override

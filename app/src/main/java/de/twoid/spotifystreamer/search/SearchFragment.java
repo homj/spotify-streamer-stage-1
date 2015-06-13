@@ -73,16 +73,17 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
 
     @Override
     protected void setupViews(){
+        displayMessage(Messages.MESSAGE_SEARCH);
         searchView.setOnQueryTextListener(new OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query){
-                search(query);
+                searchDelayed(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText){
-                search(newText);
+                searchDelayed(newText);
                 return false;
             }
         });
@@ -100,13 +101,18 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
     }
 
     private void search(String query){
-        if(query == null || query.equals(lastQuery)){
+        if(query == null || query.length() == 0){
+            if(artistList != null){
+                artistList.clear();
+            }
+            displayMessage(Messages.MESSAGE_SEARCH);
+        }else if(query.equals(lastQuery)){
             return;
         }
 
         lastQuery = query;
         if(!isConnectedToInternet()){
-            displayError(Messages.MESSAGE_NO_INTERNET);
+            displayMessage(Messages.MESSAGE_NO_INTERNET);
             return;
         }
 
@@ -119,7 +125,7 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
 
             @Override
             public Message resolveError(SpotifyError error){
-                return new Message(R.string.msg_search_hint);
+                return Messages.MESSAGE_SEARCH;
             }
         });
     }
@@ -132,12 +138,12 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
                 searchAdapter.setArtists(artistList);
 
                 if(artistList == null || artistList.isEmpty()){
-                    displayError(Messages.MESSAGE_NO_ARTISTS);
+                    displayMessage(Messages.MESSAGE_NO_ARTISTS);
                 }else{
                     displayContent();
                 }
             }else{
-                displayError(Messages.MESSAGE_NO_ARTISTS);
+                displayMessage(Messages.MESSAGE_NO_ARTISTS);
             }
         }else if(type == MESSAGE_TYPE_SEARCH){
             search((String) message.obj);
@@ -201,6 +207,6 @@ public class SearchFragment extends SpotifyFragment implements Handler.Callback,
 
     public interface OnSpotifyArtistSelectedListener {
 
-        public void onArtistSelected(SpotifyArtist artist);
+        void onArtistSelected(SpotifyArtist artist);
     }
 }

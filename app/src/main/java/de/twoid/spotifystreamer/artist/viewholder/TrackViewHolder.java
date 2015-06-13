@@ -1,6 +1,5 @@
 package de.twoid.spotifystreamer.artist.viewholder;
 
-import android.content.Intent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -12,7 +11,6 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import de.twoid.spotifystreamer.ItemListAdapter.ItemViewHolder;
-import de.twoid.spotifystreamer.player.PlayerActivity;
 import de.twoid.spotifystreamer.R;
 import de.twoid.spotifystreamer.object.SpotifyImage;
 import de.twoid.spotifystreamer.object.SpotifyTrack;

@@ -1,31 +1,19 @@
 package de.twoid.spotifystreamer.player;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.ColorFilter;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.Palette.PaletteAsyncListener;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.Toolbar;
-import android.text.format.DateUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ImageView;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -72,13 +60,15 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
     protected Intent serviceIntent;
     protected boolean isPlaying = false;
     protected boolean areViewsCreated = false;
-    protected @State int currentPlayerState = STATE_NONE;
+    protected
+    @State
+    int currentPlayerState = STATE_NONE;
 
     //connect to the service
-    private ServiceConnection streamingConnection = new ServiceConnection(){
+    private ServiceConnection streamingConnection = new ServiceConnection() {
 
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
+        public void onServiceConnected(ComponentName name, IBinder service){
             SpotifyStreamingBinder binder = (SpotifyStreamingBinder) service;
             //get service
             streamingService = binder.getService();
@@ -99,7 +89,7 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
+        public void onServiceDisconnected(ComponentName name){
 
         }
     };
@@ -125,7 +115,7 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
     }
 
     private boolean restoreSession(Bundle bundle){
-        if(bundle == null ||!bundle.containsKey(ARG_SESSION)){
+        if(bundle == null || !bundle.containsKey(ARG_SESSION)){
             return false;
         }else{
             session = bundle.getParcelable(ARG_SESSION);
@@ -305,15 +295,7 @@ public abstract class PlayerBaseFragment extends BaseFragment implements com.squ
     protected abstract void updateControlsColors();
 
     protected boolean hasImage(){
-        if(session == null){
-            return false;
-        }
-
-        if(session.getCurrentTrack() == null){
-            return false;
-        }
-
-        return session.getCurrentTrack().hasImage();
+        return session != null && session.getCurrentTrack() != null && session.getCurrentTrack().hasImage();
     }
 
     protected abstract SpotifyImage getImage();

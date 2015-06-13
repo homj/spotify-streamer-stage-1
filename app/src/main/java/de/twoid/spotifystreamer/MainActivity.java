@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements OnSpotifyArtistSe
 
         if(playerBarFragment != null && !ServiceUtils.isServiceRunning(this, PlayerService.class)){
             FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().remove(playerBarFragment);
+            fragmentManager.beginTransaction().remove(playerBarFragment).commit();
             onHidePlayerBar();
         }
     }

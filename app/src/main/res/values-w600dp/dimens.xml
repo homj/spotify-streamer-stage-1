@@ -5,4 +5,5 @@
     <dimen name="player_controls_height">128dp</dimen>
     <dimen name="notification_height">128dp</dimen>
     <dimen name="player_seekbar_width">514dp</dimen>
+    <dimen name="artist_toolbar_height">384dp</dimen>
 </resources>
