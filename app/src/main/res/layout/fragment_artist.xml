@@ -45,7 +45,7 @@ https://github.com/chrisbanes/cheesesquare/blob/master/app/src/main/res/layout/a
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                     app:contentInsetStart="@dimen/default_spacing"
                     app:layout_collapseMode="pin"/>
 

@@ -15,6 +15,7 @@ import android.support.v7.graphics.Palette.PaletteAsyncListener;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -33,6 +34,7 @@ import de.twoid.spotifystreamer.object.SpotifyArtist;
 import de.twoid.spotifystreamer.object.SpotifyTrack;
 import de.twoid.spotifystreamer.player.PlayerActivity;
 import de.twoid.spotifystreamer.search.OnItemClickListener;
+import de.twoid.spotifystreamer.settings.Preferences;
 import de.twoid.spotifystreamer.widget.EmptyLayout;
 import kaaes.spotify.webapi.android.SpotifyError;
 import kaaes.spotify.webapi.android.models.Tracks;
@@ -108,7 +110,9 @@ public class ArtistFragment extends SpotifyFragment implements Callback, Palette
             displayLoading();
 
             Map<String, Object> options = new HashMap<>(1);
-            options.put("country", "DE");
+            String countryCode = Preferences.getCountryCode(getActivity());
+            options.put("country", countryCode);
+            Log.d("ArtistFragment", "country code: " + countryCode);
             spotify.getArtistTopTrack(artist.id, options, new SpotifyCallback<Tracks>() {
 
                 @Override

@@ -2,8 +2,11 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="de.twoid.spotifystreamer.player.PlayerActivity">
-    <item android:id="@+id/action_settings"
-          android:title="@string/action_settings"
+    <item android:id="@+id/action_share"
+          android:title="@string/action_share"
           android:orderInCategory="100"
-          app:showAsAction="never"/>
+          android:icon="@drawable/abc_ic_menu_share_mtrl_alpha"
+          app:showAsAction="ifRoom"
+          app:actionProviderClass=
+              "android.support.v7.widget.ShareActionProvider"/>
 </menu>

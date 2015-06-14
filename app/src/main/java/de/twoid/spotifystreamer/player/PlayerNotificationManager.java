@@ -22,9 +22,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.app.NotificationCompat.MediaStyle;
 
@@ -35,6 +38,7 @@ import com.squareup.picasso.Target;
 import de.twoid.spotifystreamer.R;
 import de.twoid.spotifystreamer.object.SpotifyTrack;
 import de.twoid.spotifystreamer.player.StatefulMediaPlayer.State;
+import de.twoid.spotifystreamer.settings.Preferences;
 
 import static de.twoid.spotifystreamer.player.StatefulMediaPlayer.STATE_END;
 import static de.twoid.spotifystreamer.player.StatefulMediaPlayer.STATE_ERROR;
@@ -46,7 +50,7 @@ import static de.twoid.spotifystreamer.player.StatefulMediaPlayer.STATE_STOPPED;
  * Used https://github.com/googlesamples/android-UniversalMusicPlayer/blob/master/mobile/src/main/java/com/example/android/uamp/MediaNotificationManager.java
  * as a base to create this PlayerNotificationManager
  */
-public class PlayerNotificationManager extends BroadcastReceiver {
+public class PlayerNotificationManager extends BroadcastReceiver implements OnSharedPreferenceChangeListener{
     private static final int NOTIFICATION_ID = 368;
     private static final int REQUEST_CODE = 100;
 
@@ -76,6 +80,7 @@ public class PlayerNotificationManager extends BroadcastReceiver {
 
     public PlayerNotificationManager(PlayerService service){
         mService = service;
+        PreferenceManager.getDefaultSharedPreferences(mService).registerOnSharedPreferenceChangeListener(this);
         currentTrack = mService.getCurrentTrack();
         playerState = mService.getCurrentState();
 
@@ -99,6 +104,12 @@ public class PlayerNotificationManager extends BroadcastReceiver {
         // Cancel all notifications to handle the case where the Service was killed and
         // restarted by the system.
         mNotificationManager.cancelAll();
+    }
+
+    @Override
+    protected void finalize() throws Throwable{
+        PreferenceManager.getDefaultSharedPreferences(mService).unregisterOnSharedPreferenceChangeListener(this);
+        super.finalize();
     }
 
     /**
@@ -261,13 +272,13 @@ public class PlayerNotificationManager extends BroadcastReceiver {
                 .setDeleteIntent(mStopIntent)
                 .setColor(mNotificationColor)
                 .setSmallIcon(R.drawable.ic_play_24dp)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setUsesChronometer(true)
                 .setContentIntent(createContentIntent())
                 .setContentTitle(currentTrack.name)
                 .setContentText(currentTrack.artists == null ? null : currentTrack.artists.get(0).name)
                 .setLargeIcon(image);
 
+        setVisibility(notificationBuilder);
         setNotificationPlaybackState(notificationBuilder);
         if(imageUrl != null){
             loadImage(imageUrl, notificationBuilder);
@@ -335,5 +346,19 @@ public class PlayerNotificationManager extends BroadcastReceiver {
 
             }
         });
+    }
+
+    private void setVisibility(NotificationCompat.Builder builder){
+        builder.setVisibility(Preferences.getNotificationVisibility(mService));
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key){
+        if(mStarted && Preferences.KEY_NOTIFICATION_VISIBILITY.equals(key)){
+            Notification notification = createNotification();
+            if(notification != null){
+                mNotificationManager.notify(NOTIFICATION_ID, notification);
+            }
+        }
     }
 }

@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import de.twoid.spotifystreamer.artist.ArtistActivity;
@@ -16,6 +18,7 @@ import de.twoid.spotifystreamer.player.PlayerBarFragment.OnPlayerBarStateChangeL
 import de.twoid.spotifystreamer.player.PlayerService;
 import de.twoid.spotifystreamer.search.SearchFragment;
 import de.twoid.spotifystreamer.search.SearchFragment.OnSpotifyArtistSelectedListener;
+import de.twoid.spotifystreamer.settings.SettingsActivity;
 import de.twoid.spotifystreamer.util.ServiceUtils;
 
 public class MainActivity extends AppCompatActivity implements OnSpotifyArtistSelectedListener, OnPlayerBarStateChangeListener {
@@ -65,6 +68,22 @@ public class MainActivity extends AppCompatActivity implements OnSpotifyArtistSe
                     .replace(R.id.spotifyartist_detail_container, artistFragment, ArtistFragment.TAG)
                     .commit();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        if(item.getItemId() == R.id.action_settings){
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -16,6 +16,7 @@ import kaaes.spotify.webapi.android.models.Track;
  * Created by Johannes on 01.06.2015.
  */
 public class SpotifyTrack implements Parcelable {
+    private static final String EXTERNAL_URL_SPOTIFY = "spotify";
 
     public List<SpotifyArtistSimple> artists;
     public List<String> available_markets;
@@ -119,6 +120,14 @@ public class SpotifyTrack implements Parcelable {
         }
 
         return album.images.get(album.images.size() - 1);
+    }
+
+    public String getSpotifyUrl(){
+        if(external_urls != null && external_urls.containsKey(EXTERNAL_URL_SPOTIFY)){
+            return external_urls.get(EXTERNAL_URL_SPOTIFY);
+        }
+
+        return null;
     }
 
     public boolean hasArtists(){

@@ -1,16 +1,26 @@
 package de.twoid.spotifystreamer.player;
 
+import android.content.Intent;
 import android.graphics.ColorFilter;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
+import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ShareCompat;
+import android.support.v4.app.ShareCompat.IntentBuilder;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette.PaletteAsyncListener;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.SeekBar;
@@ -35,7 +45,7 @@ public class PlayerFragment extends PlayerBaseFragment implements com.squareup.p
     private SeekBar seekBar;
     private TextView tvPassedTime;
     private TextView tvTotalTime;
-
+    private ShareActionProvider shareActionProvider;
 
     public static PlayerFragment getInstance(PlayerSession session){
         PlayerFragment fragment = new PlayerFragment();
@@ -48,6 +58,53 @@ public class PlayerFragment extends PlayerBaseFragment implements com.squareup.p
     public PlayerFragment(){
 
     }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_player, menu);
+        MenuItem shareMenuItem = menu.findItem(R.id.action_share);
+        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareMenuItem);
+        updateShareMenuItem(streamingService == null ? null : streamingService.getCurrentTrack());
+    }
+
+
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item){
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        int id = item.getItemId();
+//
+//        //noinspection SimplifiableIfStatement
+//        if(id == R.id.action_share){
+//            SpotifyTrack currentTrack = streamingService == null ? null : streamingService.getCurrentTrack();
+//            if(currentTrack == null){
+//                return false;
+//            }
+//
+//            String url = currentTrack.getSpotifyUrl();
+//
+//            if(url == null){
+//                url = currentTrack.preview_url;
+//            }
+//
+//            IntentBuilder builder = IntentBuilder.from(getActivity())
+//                    .setChooserTitle(getString(R.string.share_message, currentTrack.name))
+//                    .setText(url);
+//            ShareCompat.configureMenuItem(item, builder);
+////            getActivity().getOp
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
     @Override
     protected int getLayoutId(){
@@ -132,6 +189,32 @@ public class PlayerFragment extends PlayerBaseFragment implements com.squareup.p
         }
 
         return null;
+    }
+
+    @Override
+    protected void setTrack(SpotifyTrack track){
+        super.setTrack(track);
+
+        updateShareMenuItem(track);
+    }
+
+    private void updateShareMenuItem(SpotifyTrack track){
+        if(track == null || shareActionProvider == null){
+            return;
+        }
+
+        String url = track.getSpotifyUrl();
+
+        if(url == null){
+            url = track.preview_url;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, url);
+
+        shareActionProvider.setShareIntent(intent);
+
     }
 
     @Override
